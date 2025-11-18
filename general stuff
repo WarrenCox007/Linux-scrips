@@ -1,6 +1,0 @@
-source ~/.bashrc
-
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Opencode/main/install_opencode_full.sh)"
-
-
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Linux-scrips/main/ssh access.sh)"
