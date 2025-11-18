@@ -1,28 +1,11 @@
-source ~/.bashrc
-
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Opencode/main/install_opencode_full.sh)"
-
-
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Linux-scrips/main/ssh access.sh)"
-
-how to remove ssh key :
-ssh-keygen -R 192.168.10.20
-
-adduser username
-usermod -aG sudo username
-su - username
-
-
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
-
-
-
-
-
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+# Quick Node 20 setup snippet (if you only need Node.js):
+#   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+#   apt install -y nodejs
+
+# Full setup with cleanup, Node 20, and Gemini CLI
 
 echo "[+] Updating system"
 apt update -y
@@ -47,7 +30,7 @@ echo "Gemini CLI installed."
 echo "Now set your API key:"
 echo
 echo 'export GEMINI_API_KEY="YOUR_KEY_HERE"' >> ~/.bashrc
-echo "# Replace YOUR_KEY_HERE with your actual key" 
+echo "# Replace YOUR_KEY_HERE with your actual key"
 echo
 echo "Then reload shell:"
 echo "  source ~/.bashrc"
