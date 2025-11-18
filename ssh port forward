@@ -1,0 +1,19 @@
+ssh-keygen -R 192.168.10.20
+
+
+1) Best and simplest — SSH local port forwarding (no browser on server)
+
+Do this from your workstation (where you have a browser).
+
+From your workstation open an SSH tunnel to the server:
+
+ssh -L 1455:localhost:1455 root@your-server-ip
+
+
+In the same SSH session on the server run the CLI that starts the local callback listener:
+
+codex login
+# or codex login --device-auth if using device flow (whatever command starts the auth listener)
+
+
+The CLI will print a URL like http://localhost:1455/auth/callback?.... Copy that URL and open it in your workstation browser (not the server). The browser request to http://localhost:1455 will be forwarded over the SSH tunnel to the listener on the server. Complete the sign-in in your browser. Done.
