@@ -5,12 +5,17 @@
 
 #bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Linux-scrips/main/ssh%20access.sh)"
 
+#!/usr/bin/env bash
+
+# Enable SSH password & keyboard-interactive auth safely
+# Usage:
+# curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Linux-scrips/main/ssh%20access.sh | sudo bash
 
 set -euo pipefail
 
 ensure_root() {
   if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
-    echo "This script must be run as root. Re-run with sudo or as the root user." >&2
+    echo "This script must be run as root. Re-run with sudo or as root." >&2
     exit 1
   fi
 }
@@ -18,20 +23,55 @@ ensure_root() {
 update_sshd_config() {
   local config_path="/etc/ssh/sshd_config"
   local backup_path="${config_path}.bak.$(date +%Y%m%d%H%M%S)"
+
   cp "$config_path" "$backup_path"
 
-  local tmp_file
-  tmp_file=$(mktemp)
+  local tmp
+  tmp="$(mktemp)"
 
   awk '
-    /^#?PasswordAuthentication/ {print "PasswordAuthentication yes"; next}
-    /^#?KbdInteractiveAuthentication/ {print "KbdInteractiveAuthentication yes"; next}
-    /^#?UsePAM/ {print "UsePAM yes"; next}
-    {print}
-  ' "$config_path" > "$tmp_file"
+    BEGIN {
+      found_pass = 0
+      found_kbd = 0
+      found_pam = 0
+    }
 
-  cat "$tmp_file" > "$config_path"
-  rm -f "$tmp_file"
+    /^#?PasswordAuthentication/ {
+      print "PasswordAuthentication yes"
+      found_pass = 1
+      next
+    }
+
+    /^#?KbdInteractiveAuthentication/ {
+      print "KbdInteractiveAuthentication yes"
+      found_kbd = 1
+      next
+    }
+
+    /^#?UsePAM/ {
+      print "UsePAM yes"
+      found_pam = 1
+      next
+    }
+
+    { print }
+
+    END {
+      if (!found_pass) print "PasswordAuthentication yes"
+      if (!found_kbd) print "KbdInteractiveAuthentication yes"
+      if (!found_pam) print "UsePAM yes"
+    }
+  ' "$config_path" > "$tmp"
+
+  # Validate before applying
+  cp "$tmp" "$config_path"
+  if ! sshd -t; then
+    echo "Error: SSH config validation failed. Restoring backup."
+    cp "$backup_path" "$config_path"
+    exit 1
+  fi
+
+  mv "$tmp" "$config_path"
 }
 
 restart_sshd() {
@@ -46,7 +86,7 @@ main() {
   ensure_root
   update_sshd_config
   restart_sshd
-  echo "SSH configuration updated. Backup saved with timestamp; password login is now enabled."
+  echo "SSH config updated safely. Backup created: $(ls /etc/ssh/sshd_config.bak.* | tail -1)"
 }
 
 main "$@"
