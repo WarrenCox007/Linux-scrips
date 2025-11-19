@@ -3,6 +3,9 @@
 # Configure SSH to allow password and keyboard-interactive authentication.
 # Designed for use on fresh machines via: curl -fsSL <url>/ssh%20access.sh | sudo bash
 
+#bash -c "$(curl -fsSL https://raw.githubusercontent.com/WarrenCox007/Linux-scrips/main/ssh%access.sh)"
+
+
 set -euo pipefail
 
 ensure_root() {
